@@ -1,0 +1,35 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: docker:edge-git
+    working_directory: /builder
+    branches:
+      only:
+        - deploy/production
+        - deploy/staging
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install AWS-CLI
+          command: |
+            set -ex
+            apk --update --upgrade add --no-cache python py-pip
+            pip --no-cache-dir install awscli==1.11.100
+      - run:
+          name: Build application Docker image
+          command: |
+            $(aws ecr get-login --no-include-email --region ap-northeast-1)
+            docker build -t rvillage/try_ecs_deploy:${CIRCLE_SHA1} -f docker/Dockerfile.release .
+            docker tag rvillage/try_ecs_deploy:${CIRCLE_SHA1} 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+            docker push 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+      # - deploy:
+      #     name: Push application Docker image
+      #     command: |
+      #       if [ "${CIRCLE_BRANCH}" == "deploy/staging" ]; then
+      #         docker login --username=${HEROKU_USER} --password=${HEROKU_API_KEY} registry.heroku.com
+      #         docker tag build:${CIRCLE_SHA1} registry.heroku.com/${PROJECT_NAME}/web:latest
+      #         docker push registry.heroku.com/${PROJECT_NAME}/web:latest
+      #       fi
