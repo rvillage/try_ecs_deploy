@@ -9,15 +9,28 @@ jobs:
       only:
         - deploy/production
         - deploy/staging
+        - master
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          reusable: true
       - run:
           name: Install AWS-CLI
           command: |
             set -ex
             apk --update --upgrade add --no-cache python py-pip
             pip --no-cache-dir install awscli==1.11.100
+      - restore_cache:
+          name: Restoring Docker image
+          keys:
+            - image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile" }}
+            - image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+      - run:
+          name: Load application Docker image
+          command: |
+            if [ -e /cache/release.tar ]; then
+              docker load -i /cache/release.tar
+            fi
       - run:
           name: Build application Docker image
           command: |
@@ -25,6 +38,15 @@ jobs:
             docker build -t rvillage/try_ecs_deploy:${CIRCLE_SHA1} -f docker/Dockerfile.release .
             docker tag rvillage/try_ecs_deploy:${CIRCLE_SHA1} 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
             docker push 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+      - run:
+          name: Save application Docker image
+          command: |
+            docker save -o /cache/release.tar rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+      - save_cache:
+          name: Cache Docker image
+          key: image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile" }}
+          paths:
+            - /cache/release.tar
       # - deploy:
       #     name: Push application Docker image
       #     command: |
