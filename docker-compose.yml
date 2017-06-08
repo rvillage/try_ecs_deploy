@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:9.6.2-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - '5432:5432'
+    networks:
+      - default
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    image: rvillage/rails5:0.0.1
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres/app_dev
+    ports:
+      - '3000:3000'
+    networks:
+      - default
+    depends_on:
+      - postgres
+    volumes:
+      - .:/usr/src/app
+      - bundle_data:/usr/local/bundle
+    command: ["rails", "s", "-b", "0.0.0.0"]
+
+  postgres-gui:
+    image: rvillage/pgweb-alpine
+    ports:
+      - '8081:8081'
+    networks:
+      - default
+    depends_on:
+      - postgres
+    command: ["--url", "postgres://postgres:password@postgres?sslmode=disable"]
+
+volumes:
+  postgres_data:
+  bundle_data:

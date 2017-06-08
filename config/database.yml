@@ -1,0 +1,13 @@
+default: &default
+  encoding: utf8
+  url: <%= ENV.fetch('DATABASE_URL') { 'postgres://myuser:mypass@localhost/somedatabase' } %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  database: app_test
+
+production:
+  <<: *default

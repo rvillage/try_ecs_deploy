@@ -1,0 +1,18 @@
+FROM ruby:2.4.1-alpine
+
+RUN set -ex \
+    && apk --update --upgrade add --no-cache \
+         curl-dev ruby-dev build-base \
+         libxml2-dev libxslt-dev tzdata postgresql-dev \
+         ruby-json yaml nodejs
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY Gemfile /usr/src/app/
+COPY Gemfile.lock /usr/src/app/
+RUN bundle install -j4
+
+COPY . /usr/src/app
+
+CMD ["rails", "server", "-b", "0.0.0.0"]
