@@ -28,8 +28,9 @@ jobs:
       - run:
           name: Load application Docker image
           command: |
-            if [ -e /cache/release.tar ]; then
-              docker load -i /cache/release.tar
+            if [ -e release.tar ]; then
+              docker load -i release.tar
+              rm release.tar
             fi
       - run:
           name: Build application Docker image
@@ -41,12 +42,12 @@ jobs:
       - run:
           name: Save application Docker image
           command: |
-            docker save -o /cache/release.tar rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+            docker save -o release.tar rvillage/try_ecs_deploy:${CIRCLE_SHA1}
       - save_cache:
           name: Cache Docker image
           key: image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile" }}
           paths:
-            - /cache/release.tar
+            - release.tar
       # - deploy:
       #     name: Push application Docker image
       #     command: |
