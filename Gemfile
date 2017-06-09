@@ -20,8 +20,8 @@ group :development, :test do
 end
 
 group :development do
-  gem 'web-console'
   gem 'listen'
   gem 'spring'
   gem 'spring-watcher-listen'
+  gem 'web-console'
 end
