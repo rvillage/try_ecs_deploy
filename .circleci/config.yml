@@ -27,19 +27,18 @@ jobs:
       - restore_cache:
           name: Restoring Docker image
           keys:
-            - image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile" }}
-            - image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+            - v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+            - v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
       - run:
           name: Load application Docker image
           command: |
-            if [ -e image.tar ]; then
-              docker load -q -i image.tar
+            if [ -e ~/cache/image.tar ]; then
+              docker load -q -i ~/cache/image.tar
             fi
       - run:
           name: Build application Docker image
           command: |
-            if [ -e image.tar ]; then
-              rm image.tar
+            if [ -e ~/cache/image.tar ]; then
               docker build --cache-from rvillage/${PROJECT_NAME}:latest -t rvillage/${PROJECT_NAME}:latest -f docker/Dockerfile.release .
             else
               docker build -t rvillage/${PROJECT_NAME}:latest -f docker/Dockerfile.release .
@@ -47,12 +46,13 @@ jobs:
       - run:
           name: Save application Docker image
           command: |
-            docker save -o image.tar rvillage/${PROJECT_NAME}:latest
+            mkdir -p ~/cache
+            docker save -o ~/cache/image.tar rvillage/${PROJECT_NAME}:latest
       - save_cache:
           name: Cache Docker image
-          key: image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile" }}
+          key: v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
           paths:
-            - image.tar
+            - ~/cache
       - deploy:
           name: Push application Docker image
           command: |
