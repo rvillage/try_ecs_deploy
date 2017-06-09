@@ -36,13 +36,13 @@ jobs:
           name: Build application Docker image
           command: |
             $(aws ecr get-login --no-include-email --region ap-northeast-1)
-            docker build -t rvillage/try_ecs_deploy:${CIRCLE_SHA1} -f docker/Dockerfile.release .
-            docker tag rvillage/try_ecs_deploy:${CIRCLE_SHA1} 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+            docker build -t rvillage/try_ecs_deploy -f docker/Dockerfile.release .
+            docker tag rvillage/try_ecs_deploy 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
             docker push 086937360264.dkr.ecr.ap-northeast-1.amazonaws.com/rvillage/try_ecs_deploy:${CIRCLE_SHA1}
       - run:
           name: Save application Docker image
           command: |
-            docker save -o release.tar rvillage/try_ecs_deploy:${CIRCLE_SHA1}
+            docker save -o release.tar rvillage/try_ecs_deploy
       - save_cache:
           name: Cache Docker image
           key: image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile" }}
