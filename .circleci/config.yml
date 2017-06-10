@@ -49,7 +49,7 @@ jobs:
             mkdir -p ~/cache
             if [ -e ~/cache/Gemfile.lock.sha1 ]; then
               sha1sum -s -c ~/cache/Gemfile.lock.sha1
-              [ ! $? = 0 ] && exit 0
+              [ $? = 0 ] && exit 0
             fi
             echo "Create Docker image Cachefile."
             rm -f ~/cache/*
