@@ -27,8 +27,8 @@ jobs:
       - restore_cache:
           name: Restoring Docker image
           keys:
-            - v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
-            - v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+            - v1000-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+            - v1000-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
       - run:
           name: Load application Docker image
           command: |
@@ -47,10 +47,17 @@ jobs:
           name: Save application Docker image
           command: |
             mkdir -p ~/cache
+            if [ -e ~/cache/Gemfile.lock.sha1 ]; then
+              sha1sum -s -c ~/cache/Gemfile.lock.sha1
+              [ ! $? = 0 ] && exit 0
+            fi
+            echo "Create Docker image Cachefile."
+            rm -f ~/cache/*
+            sha1sum Gemfile.lock > ~/cache/Gemfile.lock.sha1
             docker save -o ~/cache/image.tar rvillage/${PROJECT_NAME}:latest
       - save_cache:
           name: Cache Docker image
-          key: v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+          key: v1000-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
           paths:
             - ~/cache
       - deploy:
