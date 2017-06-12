@@ -27,8 +27,8 @@ jobs:
       - restore_cache:
           name: Restoring Docker image
           keys:
-            - v1000-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
-            - v1000-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
+            - v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+            - v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-
       - run:
           name: Load application Docker image
           command: |
@@ -57,7 +57,7 @@ jobs:
             docker save -o ~/cache/image.tar rvillage/${PROJECT_NAME}:latest
       - save_cache:
           name: Cache Docker image
-          key: v1000-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
+          key: v1-image-{{ .Environment.CIRCLE_PROJECT_REPONAME }}-{{ checksum "Gemfile.lock" }}
           paths:
             - ~/cache
       - deploy:
