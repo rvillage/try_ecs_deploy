@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  rails:
+    image: "${ECR_HOST}/${PROJECT_NAME}:${CIRCLE_SHA1}"
+    mem_limit: 134217728
+    ports:
+      - '3000'
